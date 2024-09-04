@@ -1,16 +1,28 @@
 <script lang="ts">
+import type { PropType } from 'vue'
 import { obterReceitas } from '@/http'
 import type IReceita from '@/interfaces/IReceita'
 import CardReceita from './CardReceita.vue'
 import BotaoPrincipal from './BotaoPrincipal.vue'
+import { itensDeLista1EstaoEmLista2 } from '@/operacoes/listas'
 export default {
+  props: {
+    ingredientes: { type: Array as PropType<string[]>, required: true },
+  },
   data() {
     return {
       receitas: [] as IReceita[],
     }
   },
   async created() {
-    this.receitas = await obterReceitas()
+    const receitas = await obterReceitas()
+    this.receitas = receitas.filter((receita) => {
+      const possoFazerReceita = itensDeLista1EstaoEmLista2(
+        receita.ingredientes,
+        this.ingredientes
+      )
+      return possoFazerReceita
+    })
   },
   components: { CardReceita, BotaoPrincipal },
   emits: ['editarReceitas'],

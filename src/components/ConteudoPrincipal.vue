@@ -9,7 +9,7 @@ type Pagina = 'SelecionarIngredientes' | 'MostrarReceitas'
 export default {
   data() {
     return {
-      ingredientes: [] as Array<string>,
+      ingredientes: [] as string[],
       conteudo: 'SelecionarIngredientes' as Pagina,
     }
   },
@@ -19,8 +19,9 @@ export default {
       this.ingredientes.push(ingrediente)
     },
     removerIngrediente(ingrediente: string) {
-      const index = this.ingredientes.indexOf(ingrediente)
-      this.ingredientes.splice(index, 1)
+      this.ingredientes = this.ingredientes.filter(
+        (iLista) => ingrediente !== iLista
+      )
     },
     navegar(pagina: Pagina) {
       this.conteudo = pagina
@@ -32,16 +33,19 @@ export default {
 <template>
   <main class="conteudo-principal">
     <SuaLista :ingredientes="ingredientes" />
-    <SelecionarIngredientes
-      v-if="conteudo === 'SelecionarIngredientes'"
-      @adicionar-ingrediente="adicionarIngrediente($event)"
-      @remover-ingrediente="removerIngrediente($event)"
-      @buscar-receitas="navegar('MostrarReceitas')"
-    />
-    <MostrarReceitas
-      v-else-if="conteudo === 'MostrarReceitas'"
-      @editar-receitas="navegar('SelecionarIngredientes')"
-    />
+    <KeepAlive include="SelecionarIngredientes">
+      <SelecionarIngredientes
+        v-if="conteudo === 'SelecionarIngredientes'"
+        @adicionar-ingrediente="adicionarIngrediente($event)"
+        @remover-ingrediente="removerIngrediente($event)"
+        @buscar-receitas="navegar('MostrarReceitas')"
+      />
+      <MostrarReceitas
+        v-else-if="conteudo === 'MostrarReceitas'"
+        :ingredientes="ingredientes"
+        @editar-receitas="navegar('SelecionarIngredientes')"
+      />
+    </KeepAlive>
   </main>
 </template>
 
